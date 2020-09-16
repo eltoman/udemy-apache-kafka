@@ -6,12 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
-public class ProducerDemo {
+public class ProducerDemoWithKeys {
+    private static Logger logger = LoggerFactory.getLogger(ProducerDemoWithKeys.class);
 
-    private static Logger logger = LoggerFactory.getLogger(ProducerDemo.class);
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
 
         // Create Producer Configs
         String bootstrapServers = "127.0.0.1:9092";
@@ -25,10 +25,13 @@ public class ProducerDemo {
 
         for (int i=0; i < 10; i++) {
             // Create a producer record
-            ProducerRecord<String, String> record = new ProducerRecord<String, String>("first_topic", "Hello world: " + i);
+            ProducerRecord<String, String> record = new ProducerRecord<String, String>("example_key_topic", "id_" + i, "Hello world: " + i);
+
+            logger.info("key: " + record.key());
 
             // Send data
-            producer.send(record, producerCallback());
+            producer.send(record, producerCallback()
+            ).get(); // bad practice, this is synchronous (just to see the log)
         }
 
         // Flush
